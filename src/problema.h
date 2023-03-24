@@ -67,7 +67,27 @@ public:
       }
     }
   }
+
+  double calcularDistanciaEntrePuntos(punto otroPunto, int index) {
+    double distancia = 0;
+    for (size_t k = 0; k < otroPunto.second.size(); ++k) {
+      distancia += pow(otroPunto.second[k] - matrizCoordenadas[index].second[k], 2);
+    }
+    return sqrt(distancia);
+  }
+
+  double calcularDistanciaEntrePuntos(punto otroPunto, punto otroPunto2) {
+    double distancia = 0;
+    for (size_t k = 0; k < otroPunto.second.size(); ++k) {
+      distancia += pow(otroPunto.second[k] - otroPunto2.second[k], 2);
+    }
+    return sqrt(distancia);
+  }
 };
+
+//-------------------------------------------------------------------------------s
+
+
 
 #endif
 
