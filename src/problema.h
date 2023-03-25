@@ -87,9 +87,5 @@ public:
 
 //-------------------------------------------------------------------------------s
 
-
-
 #endif
-
-
 /**Ahora crea una nueva clase que se llame Solucion esta clase va a representar la solución de pasarle el algoritmo k-means para crear clusters a una instancia del objeto Problema, es decir representa la solución del algoritmo k-means que es un conjunto de clusters cada uno con su centroide. Quiero que tenga los siguientes atributos: */
