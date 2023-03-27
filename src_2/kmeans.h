@@ -15,12 +15,11 @@ class Kmeans {
   Kmeans() {}
 
   int number_of_points() {
-    //return this->matrix_points.size();
-    return 5;
+    return this->matrix_points.number_of_points();
   }
 
   void load(string filename) {
-    //matrix_points.load(filename);
+    matrix_points.load(filename);
   }
 
   Solution kmeans_algorithm(int k) {
@@ -39,8 +38,43 @@ class Kmeans {
     } while(!this->esIgual(clusters_antiguos));*/
     this->clusters = {};
     this->centroids = {};
-    Solution sol(this->clusters, this->centroids, 89.2);
+    Solution sol(this->clusters, this->centroids, 89.2, number_of_points());
     return sol;
+  }
+
+  void generarPrimerosCentroides() {
+    // Limpiar centroides actuales
+    centroides.clear();
+    // Inicializar la generación de números aleatorios
+    std::mt19937 generador(static_cast<unsigned long>(std::time(nullptr)));
+    std::uniform_int_distribution<int> distribucion(0, instancia.matrizCoordenadas.size() - 1);
+    // Seleccionar el primer centroide al azar
+    int indiceAleatorio = distribucion(generador);
+    centroides.push_back(instancia.matrizCoordenadas[indiceAleatorio]);
+    // Iterar hasta obtener numClusters centroides
+    for (int i = 1; i < numClusters; i++) {
+      double maxDistancia = std::numeric_limits<double>::min();
+      int indiceMaxDistancia = -1;
+      // Para cada punto en la matriz de coordenadas
+      for (int j = 0; j < instancia.matrizCoordenadas.size(); j++) {
+        double distanciaTotal = 0;
+        // Calcular la distancia acumulada a los centroides actuales
+        for (const punto& centroide : centroides) {
+          distanciaTotal += instancia.calcularDistanciaEntrePuntos(centroide, instancia.matrizCoordenadas[j]);
+        }
+        // Si la distancia acumulada es mayor que la máxima actual, actualizar la máxima y el índice
+        if (distanciaTotal > maxDistancia) {
+          maxDistancia = distanciaTotal;
+          indiceMaxDistancia = j;
+        }
+      }
+      // Añadir el punto más alejado de los centroides actuales como nuevo centroide
+      if (indiceMaxDistancia != -1) {
+        centroides.push_back(instancia.matrizCoordenadas[indiceMaxDistancia]);
+      } else {
+        std::cerr << "Error: No se encontró el punto más alejado de los centroides actuales" << std::endl;
+      }
+    }
   }
 
 };

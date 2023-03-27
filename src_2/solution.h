@@ -7,11 +7,13 @@ class Solution {
   std::vector<std::vector<point> > clusters;
   std::vector<point> centroids;
   double SSE;
+  int number_of_point;
 
-  Solution(const std::vector<std::vector<point> >& input_clusters, const std::vector<point>& input_centroids, double SSE) {
+  Solution(const std::vector<std::vector<point> >& input_clusters, const std::vector<point>& input_centroids, double SSE, int np) {
     clusters = input_clusters;
     centroids = input_centroids;
     this->SSE = SSE;
+    number_of_point = np;
   }
 
   int getNumPointsOfCluster(int clusterInd) {
@@ -24,6 +26,10 @@ class Solution {
 
   double getSSE() {
     return this->SSE;
+  }
+
+  int number_of_points() {
+    return this->number_of_point;
   }
 
   /*

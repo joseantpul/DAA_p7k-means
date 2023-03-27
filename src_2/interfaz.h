@@ -28,6 +28,7 @@ void interfaz_algoritmos::show_kmeans_table(std::string filename) {
   vector<double> SSEs;
   vector<vector<int> > points_per_cluster; // for each group of clusters how many points are in that group of clusters for each cluster 
   vector<int> numberK;
+  int number_of_points;
   for(int i = min_clusters; i <= max_clusters; i++) {
     numberK.push_back(i);
     auto startTime = high_resolution_clock::now();
@@ -35,19 +36,13 @@ void interfaz_algoritmos::show_kmeans_table(std::string filename) {
     auto finalTime = high_resolution_clock::now();
     times.push_back(duration_cast<microseconds>(finalTime - startTime).count());
     vector<int> points_per_c = {};
-    for(int clusterIndex = 0; clusterIndex < i; clusterIndex++) { // COMPROBAR
-      points_per_c.push_back(sol.getNumPointsOfCluster(clusterIndex)); // ESTO DE AQUI COMPROBAR PUEDE TENER FALLOS
-    } //COMPROBAR
-    points_per_cluster.push_back(points_per_c); // COMPROBAR
+    number_of_points = sol.number_of_points();
     SSEs.push_back(sol.getSSE());
   }
-  cout << "Instance | " << "Points per cluster | " << "K | " << "SSE | " << "time" << endl; 
+  cout << "Instance | " << "Points | " << "K | " << "SSE | " << "time" << endl; 
   for(int i = 0; i < numberK.size(); i++) {
-    cout << filename << " | ";
-    for(int indc = 0; indc < points_per_cluster[i].size(); indc++) {
-      cout << indc <<": " << points_per_cluster[i][indc] << ", ";
-    }
-    cout << "| " << numberK[i] << " | " << SSEs[i] << " | " << times[i] << endl; 
+    cout << filename << " | " << number_of_points << " | " 
+    << numberK[i] << " | " << SSEs[i] << " | " << times[i] << endl; 
   }
 }
 
