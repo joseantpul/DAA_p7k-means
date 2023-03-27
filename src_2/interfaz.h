@@ -68,15 +68,15 @@ void interfaz_algoritmos::show_grasp_table(std::string filename) {
     auto finalTime = high_resolution_clock::now();
     times.push_back(duration_cast<microseconds>(finalTime - startTime).count());
     vector<int> points_per_c = {};
-    //number_of_points = sol.number_of_points();
-    //SSEs.push_back(sol.getSSE());
-    //sol.mostrar_clusters();
+    number_of_points = sol.number_of_points();
+    SSEs.push_back(sol.getSSE());
+    sol.mostrar_clusters();
   }
   cout << "Instance        | " << "Points | " << "K | " << " LRC | " << "SSE | " << "time" << endl; 
-  //for(int i = 0; i < numberK.size(); i++) {
-  //  cout << filename << " | " << number_of_points << " | " 
-  //  << numberK[i] << " | " << SSEs[i] << " | " << times[i] << endl; 
-  //}
+  for(int i = 0; i < numberK.size(); i++) {
+    cout << filename << " | " << number_of_points << " | " 
+    << numberK[i] << " | " << SSEs[i] << " | " << times[i] << endl; 
+  }
 }
 
 

@@ -22,12 +22,9 @@ class Grasp {
   Solution grasp_algorithm(int k, int LRCsize) {
     this->numClusters = k;
     this->LRCsize = LRCsize;
-    this->inSolution.resize(matrix_points.number_of_points(), false);
+    this->isInSolution.resize(number_of_points(), false);
     for(int i = 0; i < numClusters; i++) {
       this->generateLRC();
-      for(int j = 0; j < LRC.size(); j++) {
-        cout << LRC[j].first << " ";
-      }
       this->centroids.push_back(this->takeRandomFromLRC());
       this->construirClusters();
     }
@@ -41,15 +38,16 @@ class Grasp {
   int numClusters; // number of cluster
   std::vector<point> centroids; // Centroid for each cluster
   std::vector<point> LRC;
-  std::vector<bool> inSolution;
   int LRCsize;
+  vector<bool> isInSolution;
 
   void construirClusters() {
     // Vaciar atributo clusters
     clusters.clear();
-    clusters.resize(this->numClusters, {});
+    clusters.resize(this->centroids.size(), {});
     // Para cada punto de la matriz de coordenadas de instancia
     for (const point& puntoActual : matrix_points.pointsMatrix) {
+      //if (isInSolution[puntoActual.first]) continue;
       int indiceCentroideMasCercano = -1;
       double menorDistancia = std::numeric_limits<double>::max();
       // Para cada centroide i
@@ -74,12 +72,12 @@ class Grasp {
   void generateLRC() {
     LRC.clear();
     // the ones that are already out and the ones inside the LRC on the iteration so it doesnt repeat the same minimum point
-    vector<bool> inLocalSolution = this->inSolution; 
+    vector<bool> inLocalSolution(number_of_points(), false); 
     for (int i = 0; i < LRCsize; i++) {
       double minSSE = std::numeric_limits<double>::max();
       int minSSEIndex = -1;
       for (int j = 0; j < matrix_points.number_of_points(); ++j) {
-        if (!inLocalSolution[j]) {
+        if (!inLocalSolution[j] && !isInSolution[j]) {
           double sse = calculateSSE(matrix_points.pointsMatrix[j], matrix_points.pointsMatrix);
           if (sse < minSSE) {
             minSSE = sse;
@@ -98,10 +96,9 @@ class Grasp {
 
   point takeRandomFromLRC() {
     if (LRC.size() > 0) {
-      int randomIndex = rand() % LRC.size();
+      int randomIndex = rand() % (LRC.size());
       point randomPoint = LRC[randomIndex];
-      LRC.clear();
-      this->inSolution[randomPoint.first] = true;
+      isInSolution[randomPoint.first] = true;
       return randomPoint;
     } else {
       throw std::runtime_error("La LRC está vacía");
