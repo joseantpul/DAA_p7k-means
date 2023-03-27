@@ -2,53 +2,12 @@
 #ifndef RESOLUCION
 #define RESOLUCION
 
-#include <iostream>
-#include <vector>
 #include <map>
-#include "problema.h"
-
-// Clase solución
-
-class Solucion {
- public:
-  std::vector<std::vector<punto> > clusters;
-  std::vector<punto> centroides;
-
-  Solucion(const std::vector<std::vector<punto> >& input_clusters, const std::vector<punto>& input_centroides) {
-    clusters = input_clusters;
-    centroides = input_centroides;
-  }
-
-  void mostrar_centroides() {
-    int contador = 0;
-    for (const punto& centroide : centroides) {
-      std::cout << "Centroide " << contador << ": (";
-      for (size_t i = 0; i < centroide.second.size(); ++i) {
-        std::cout << centroide.second[i];
-        if (i < centroide.second.size() - 1) {
-          std::cout << ", ";
-        }
-      }
-      std::cout << ")\n";
-      contador++;
-    }
-  }
-
-  void mostrar_clusters() {
-    int contador = 0;
-    for (const std::vector<punto>& cluster : clusters) {
-      std::cout << "Cluster " << contador << ": [";
-      for (size_t i = 0; i < cluster.size(); ++i) {
-        std::cout << cluster[i].first;
-        if (i < cluster.size() - 1) {
-          std::cout << ", ";
-        }
-      }
-      std::cout << "]\n";
-      contador++;
-    }
-  }
-};
+#include "solucion.h"
+#include <random>
+#include <limits>
+#include <ctime>
+#include <cmath>
 
 
 class Kmeans {
@@ -64,18 +23,17 @@ class Kmeans {
   //y comprobar quel os centroides tienen el tamaño instancia.dimension
 
   Solucion kmeans_algoritmo() {
-    centroides.push_back({instancia.matrizCoordenadas[1]});
-    centroides.push_back({instancia.matrizCoordenadas[5]});
-    centroides.push_back({instancia.matrizCoordenadas[9]});
-    numClusters = 3;
-
-    // Calcular k mediante heurística
+    // Calcular k mediante heurística 
+    this->numClusters = this->metaheuristica();
+    //std::cout << "Número de clusters: " << numClusters << std::endl;
     // Elegir primeros k centroides
+    this->generarPrimerosCentroides();
     int iteracion = 1;
     std::vector<std::vector<punto> > clusters_antiguos;
     do {
       clusters_antiguos = this->clusters;
       this->construirClusters();
+      //mostrar_clusters();
       this->recalcularCentroides();
       std::cout << "Iteración: " << iteracion << std::endl;
       iteracion++;
@@ -85,6 +43,10 @@ class Kmeans {
     return sol;
   }
 
+  /**
+   * Vacio los cluster que ya había y creo unos nuevos, asignando
+   * a cada punto su cluster más cercano usando la distancia euclidea
+  */
   void construirClusters() {
     // Vaciar atributo clusters
     clusters.clear();
@@ -93,17 +55,16 @@ class Kmeans {
     for (const punto& puntoActual : instancia.matrizCoordenadas) {
       int indiceCentroideMasCercano = -1;
       double menorDistancia = std::numeric_limits<double>::max();
-
       // Para cada centroide i
       for (int i = 0; i < numClusters; i++) {
-        double distancia = instancia.calcularDistanciaEntrePuntos(this->centroides[i], puntoActual.first);
+        double distancia = instancia.calcularDistanciaEntrePuntos(this->centroides[i], puntoActual);
         // Si la distancia calculada es menor que la menorDistancia actual
         if (distancia < menorDistancia) {
           indiceCentroideMasCercano = i;
           menorDistancia = distancia;
         }
       }
-    // Suponemos que los atributos clusters y centroides están en concordancia
+      // Suponemos que los atributos clusters y centroides están en concordancia
       int indiceClusterAlquepertenece = indiceCentroideMasCercano;
       if (indiceClusterAlquepertenece != -1) {
         this->clusters[indiceClusterAlquepertenece].push_back(puntoActual);
@@ -113,6 +74,10 @@ class Kmeans {
     }
   }
 
+  /**
+   * Esto se ejecuta después de formar nuevos clusters con construirClusters,
+   * una vez formados se vuelven a recalcular los centroides de cada cluster
+  */
   void recalcularCentroides() {
     this->centroides.clear();
     for(int indiceCluster = 0; indiceCluster < numClusters; indiceCluster++) {
@@ -132,10 +97,48 @@ class Kmeans {
     } 
   }
 
-  void generarPrimerosClusters() {
-        // Implementa la lógica para generar los primeros clusters usando la heurística y el 10% como se menciona en el pseudocódigo
+  /**
+   * Se generan los primeros k centroides generando un punto al azar y añadiendo el 
+   * resto de centroides como los puntos más alejados de este
+  */
+  void generarPrimerosCentroides() {
+    // Limpiar centroides actuales
+    centroides.clear();
+    // Inicializar la generación de números aleatorios
+    std::mt19937 generador(static_cast<unsigned long>(std::time(nullptr)));
+    std::uniform_int_distribution<int> distribucion(0, instancia.matrizCoordenadas.size() - 1);
+    // Seleccionar el primer centroide al azar
+    int indiceAleatorio = distribucion(generador);
+    centroides.push_back(instancia.matrizCoordenadas[indiceAleatorio]);
+    // Iterar hasta obtener numClusters centroides
+    for (int i = 1; i < numClusters; i++) {
+      double maxDistancia = std::numeric_limits<double>::min();
+      int indiceMaxDistancia = -1;
+      // Para cada punto en la matriz de coordenadas
+      for (int j = 0; j < instancia.matrizCoordenadas.size(); j++) {
+        double distanciaTotal = 0;
+        // Calcular la distancia acumulada a los centroides actuales
+        for (const punto& centroide : centroides) {
+          distanciaTotal += instancia.calcularDistanciaEntrePuntos(centroide, instancia.matrizCoordenadas[j]);
+        }
+        // Si la distancia acumulada es mayor que la máxima actual, actualizar la máxima y el índice
+        if (distanciaTotal > maxDistancia) {
+          maxDistancia = distanciaTotal;
+          indiceMaxDistancia = j;
+        }
+      }
+      // Añadir el punto más alejado de los centroides actuales como nuevo centroide
+      if (indiceMaxDistancia != -1) {
+        centroides.push_back(instancia.matrizCoordenadas[indiceMaxDistancia]);
+      } else {
+        std::cerr << "Error: No se encontró el punto más alejado de los centroides actuales" << std::endl;
+      }
+    }
   }
 
+  /**
+   * Comprueba si dos agrupamientos son iguales
+  */
   bool esIgual(const std::vector<std::vector<punto> >& cluster_antiguo) {
     if (clusters.size() != cluster_antiguo.size()) { // No debería de suceder nunca en kmeans
       return false;
@@ -159,7 +162,40 @@ class Kmeans {
     return true;
   }
 
-  //estos métodos quitarlos de aquí cuando termine
+
+  int metaheuristica() {
+    int n = instancia.matrizCoordenadas.size();
+    int minClusters = 2; // Mínimo número de clusters
+    // ESTA MEDIDA DEL 10% PARA PROBLEMAS CON POCOS PUNTOS TE CAGA
+    int maxClusters = std::max(minClusters, static_cast<int>(n * 0.3)); // Máximo número de clusters, 10% de los puntos
+    std::cout << "Máximo número de clusters: " << maxClusters << std::endl;
+    double menorSSE = std::numeric_limits<double>::max();
+    int optimoNumClusters = 0;
+    for (int k = minClusters; k <= maxClusters; k++) {
+      this->numClusters = k;
+      // Inicializar los primeros centroides
+      this->generarPrimerosCentroides();
+      std::vector<std::vector<punto>> clusters_antiguos;
+      do {
+        clusters_antiguos = this->clusters;
+        this->construirClusters();
+        this->recalcularCentroides();
+      } while(!this->esIgual(clusters_antiguos));
+
+      double sseActual = calcularSSE(this->centroides, this->clusters);
+      std::cout << "SSE para " << k << " clusters: " << sseActual << std::endl;
+
+      if (sseActual < menorSSE) {
+        menorSSE = sseActual;
+        optimoNumClusters = k;
+      }
+    }
+    this->clusters.clear();
+    this->centroides.clear();
+    return optimoNumClusters;
+  }
+
+
   void mostrar_centroides() {
     int contador = 0;
     for (const punto& centroide : centroides) {
@@ -189,28 +225,46 @@ class Kmeans {
       contador++;
     }
   }
+ 
+  // Calcula la suma de errores al cuadrado para un único cluster
+  double calcularSSE(const punto& centroide, const std::vector<punto>& cluster) {
+    double sse = 0;
+    for (const punto& puntoActual : cluster) {
+      double distancia = instancia.calcularDistanciaEntrePuntos(centroide, puntoActual);
+      sse += distancia * distancia;
+    }
+    return sse;
+  }
+
+  // Calcula la suma de errores al cuadrado para varios clusters
+  double calcularSSE(const std::vector<punto>& nuevosCentroides, const std::vector<std::vector<punto>>& clustersNuevos) {
+    double sse = 0;
+    for (int i = 0; i < nuevosCentroides.size(); i++) {
+      const punto& centroideActual = nuevosCentroides[i];
+      const std::vector<punto>& clusterActual = clustersNuevos[i];
+      for (const punto& puntoActual : clusterActual) {
+        double distancia = instancia.calcularDistanciaEntrePuntos(centroideActual, puntoActual);
+        sse += distancia * distancia;
+      }
+    }
+    return sse;
+  }
+
+  // Calcula la suma de errores al cuadrado usando los atributos clusters y centroides de la clase Kmeans
+  double calcularSSE() {
+    return calcularSSE(this->centroides, this->clusters);
+  }
+
+  private:
+   
+
 };
-
-
-
 
 #endif
 
 
-
 /**
- * construir clusters: 
- *     // Implementa la lógica para construir los clusters asignando a cada punto el centroide más cercano
-    /
-     * vaciar atributo clusters
-     * Para cada punto de la matriz de coordenadas de instancia {
-     *   int indiceCentroideMasCercano
-     *   para cada centroide i {
-     *     si(instancia.calcularDistanciaEntrePuntos(centroide, puntoActual) < menorDistancia )
-     *       indiceCentroideMasCercano = i;
-     *       menorDistancia = instancia.calcularDistanciaEntrePuntos(centroide, puntoActual);
-     *   }
-     *   int indiceClusterAlquepertenece = indiceCentroideMasCercano //suponemos que los atributos clusters y centroides están en corcondancia, es decir para el this->clusters[i] tiene centroide this->centroides[i]
-     *   this->clusters[i].push_back(punto)
-     * }
-    */
+Ahora quiero que hagas el método int metaheuristica() que devuelve el número óptimo de 
+clusters para una determinada nube de puntos, es decir nuestro atributo instancia, 
+puedes usar el 10% de los puntos y tiene que dar un mínimo de dos clusters
+*/

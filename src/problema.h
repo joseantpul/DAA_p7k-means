@@ -14,6 +14,7 @@ typedef std::pair<int, valores_punto> punto;
 
 class Problema {
 public:
+  std::string nombreArchivo;
   std::vector<punto> matrizCoordenadas;
   std::vector<std::vector<double>> matrizDistancias;
   int num_puntos;
@@ -25,6 +26,7 @@ public:
   }
 
   void cargarCoordenadas(const std::string& nombreArchivo) {
+    this->nombreArchivo = nombreArchivo;
     std::ifstream archivo(nombreArchivo);
     if (!archivo) {
       std::cerr << "Error al abrir el archivo" << std::endl;
@@ -70,7 +72,7 @@ public:
 
   double calcularDistanciaEntrePuntos(punto otroPunto, int index) {
     double distancia = 0;
-    for (size_t k = 0; k < otroPunto.second.size(); ++k) {
+    for (int k = 0; k < otroPunto.second.size(); k++) {
       distancia += pow(otroPunto.second[k] - matrizCoordenadas[index].second[k], 2);
     }
     return sqrt(distancia);
@@ -78,10 +80,14 @@ public:
 
   double calcularDistanciaEntrePuntos(punto otroPunto, punto otroPunto2) {
     double distancia = 0;
-    for (size_t k = 0; k < otroPunto.second.size(); ++k) {
+    for (int k = 0; k < otroPunto.second.size(); k++) {
       distancia += pow(otroPunto.second[k] - otroPunto2.second[k], 2);
     }
     return sqrt(distancia);
+  }
+
+  double calcularDistanciaEntrePuntos(int index1, int index2) {
+    return matrizDistancias[index1][index2];
   }
 };
 
