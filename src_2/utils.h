@@ -11,6 +11,7 @@
 #include <fstream>
 #include <sstream> 
 #include <algorithm> // replace
+#include <random>
 
 using namespace std;
 using namespace chrono;

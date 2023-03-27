@@ -24,9 +24,10 @@ class Kmeans {
 
   Solucion kmeans_algoritmo() {
     // Calcular k mediante heurística 
-    this->numClusters = this->metaheuristica();
+    //this->numClusters = this->metaheuristica();
     //std::cout << "Número de clusters: " << numClusters << std::endl;
     // Elegir primeros k centroides
+    this->numClusters = 3;
     this->generarPrimerosCentroides();
     int iteracion = 1;
     std::vector<std::vector<punto> > clusters_antiguos;
@@ -101,40 +102,38 @@ class Kmeans {
    * Se generan los primeros k centroides generando un punto al azar y añadiendo el 
    * resto de centroides como los puntos más alejados de este
   */
-  void generarPrimerosCentroides() {
-    // Limpiar centroides actuales
-    centroides.clear();
-    // Inicializar la generación de números aleatorios
-    std::mt19937 generador(static_cast<unsigned long>(std::time(nullptr)));
-    std::uniform_int_distribution<int> distribucion(0, instancia.matrizCoordenadas.size() - 1);
-    // Seleccionar el primer centroide al azar
-    int indiceAleatorio = distribucion(generador);
-    centroides.push_back(instancia.matrizCoordenadas[indiceAleatorio]);
-    // Iterar hasta obtener numClusters centroides
-    for (int i = 1; i < numClusters; i++) {
-      double maxDistancia = std::numeric_limits<double>::min();
-      int indiceMaxDistancia = -1;
-      // Para cada punto en la matriz de coordenadas
-      for (int j = 0; j < instancia.matrizCoordenadas.size(); j++) {
-        double distanciaTotal = 0;
-        // Calcular la distancia acumulada a los centroides actuales
-        for (const punto& centroide : centroides) {
-          distanciaTotal += instancia.calcularDistanciaEntrePuntos(centroide, instancia.matrizCoordenadas[j]);
+void generarPrimerosCentroides() {
+  int n = instancia.matrizCoordenadas.size();
+  if (numClusters > n) {
+    throw std::runtime_error("El número de clusters no puede ser mayor que el número de puntos");
+  }
+
+  std::vector<bool> usado(n, false); // Indica si un punto ya ha sido utilizado como centroide
+  this->centroides.clear(); // Limpiar centroides existentes
+
+  for (int k = 0; k < numClusters; ++k) {
+    double menorSSE = std::numeric_limits<double>::max();
+    int indiceMenorSSE = -1;
+
+    for (int i = 0; i < n; ++i) {
+      if (!usado[i]) { // Si el punto no ha sido utilizado como centroide
+        double sse = calcularSSE(instancia.matrizCoordenadas[i], instancia.matrizCoordenadas);
+        if (sse < menorSSE) {
+          menorSSE = sse;
+          indiceMenorSSE = i;
         }
-        // Si la distancia acumulada es mayor que la máxima actual, actualizar la máxima y el índice
-        if (distanciaTotal > maxDistancia) {
-          maxDistancia = distanciaTotal;
-          indiceMaxDistancia = j;
-        }
-      }
-      // Añadir el punto más alejado de los centroides actuales como nuevo centroide
-      if (indiceMaxDistancia != -1) {
-        centroides.push_back(instancia.matrizCoordenadas[indiceMaxDistancia]);
-      } else {
-        std::cerr << "Error: No se encontró el punto más alejado de los centroides actuales" << std::endl;
       }
     }
+
+    if (indiceMenorSSE != -1) {
+      usado[indiceMenorSSE] = true; // Marcar el punto seleccionado como utilizado
+      this->centroides.push_back(instancia.matrizCoordenadas[indiceMenorSSE]);
+    } else {
+      throw std::runtime_error("No se pudo encontrar un centroide válido");
+    }
   }
+}
+
 
   /**
    * Comprueba si dos agrupamientos son iguales

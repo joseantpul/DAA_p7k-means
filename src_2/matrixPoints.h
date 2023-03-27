@@ -12,6 +12,10 @@ class MatrixPoints {
 
   std::vector<point> pointsMatrix;
 
+  int gdimension() {
+    return this->dimension;
+  }
+
   void load(string filename) {
     std::ifstream ifile(filename);
     if (!ifile) {

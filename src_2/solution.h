@@ -32,10 +32,10 @@ class Solution {
     return this->number_of_point;
   }
 
-  /*
+
   void mostrar_centroides() {
     int contador = 0;
-    for (const punto& centroide : centroids) {
+    for (const point& centroide : centroids) {
       std::cout << "Centroide " << contador << ": (";
       for (size_t i = 0; i < centroide.second.size(); ++i) {
         std::cout << centroide.second[i];
@@ -50,7 +50,7 @@ class Solution {
 
   void mostrar_clusters() {
     int contador = 0;
-    for (const std::vector<punto>& cluster : clusters) {
+    for (const std::vector<point>& cluster : clusters) {
       std::cout << "Cluster " << contador << ": [";
       for (size_t i = 0; i < cluster.size(); ++i) {
         std::cout << cluster[i].first;
@@ -61,5 +61,5 @@ class Solution {
       std::cout << "]\n";
       contador++;
     }
-  }*/
+  }
 };

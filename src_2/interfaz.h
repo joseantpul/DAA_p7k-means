@@ -20,7 +20,7 @@ class interfaz_algoritmos {
 void interfaz_algoritmos::show_kmeans_table(std::string filename) {
   this->kmeans.load(filename);
   int min_clusters = 2;
-  int max_clusters = kmeans.number_of_points() * 0.1; 
+  int max_clusters = kmeans.number_of_points() * 0.3; 
   if (max_clusters < min_clusters) {
     max_clusters = 2;
   } 
@@ -38,6 +38,7 @@ void interfaz_algoritmos::show_kmeans_table(std::string filename) {
     vector<int> points_per_c = {};
     number_of_points = sol.number_of_points();
     SSEs.push_back(sol.getSSE());
+    sol.mostrar_clusters();
   }
   cout << "Instance | " << "Points | " << "K | " << "SSE | " << "time" << endl; 
   for(int i = 0; i < numberK.size(); i++) {
