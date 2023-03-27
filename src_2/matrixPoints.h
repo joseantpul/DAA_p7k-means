@@ -17,6 +17,7 @@ class MatrixPoints {
   }
 
   void load(string filename) {
+    pointsMatrix.clear();
     std::ifstream ifile(filename);
     if (!ifile) {
       std::cerr << "Error, could not open the file with the instance" << std::endl;

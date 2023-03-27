@@ -14,6 +14,8 @@ class Kmeans {
   }
 
   void load(string filename) {
+    this->centroids.clear();
+    this->clusters.clear();
     matrix_points.load(filename);
   }
 
