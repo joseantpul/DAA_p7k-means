@@ -1,4 +1,6 @@
 // Clase solución
+#ifndef SOLUTION
+#define SOLUTION
 
 #include "utils.h"
 
@@ -8,20 +10,28 @@ class Solution {
   std::vector<point> centroids;
   double SSE;
   int number_of_point;
+  int LRCsize; // only for grasp
 
-  Solution(const std::vector<std::vector<point> >& input_clusters, const std::vector<point>& input_centroids, double SSE, int np) {
+  Solution(const std::vector<std::vector<point> >& input_clusters, const std::vector<point>& input_centroids, double SSE, int np, int LRCsize = -1) {
     clusters = input_clusters;
     centroids = input_centroids;
     this->SSE = SSE;
     number_of_point = np;
+    this->LRCsize = LRCsize;
   }
 
   int getNumPointsOfCluster(int clusterInd) {
-    //return this->clusters[clusterInd].size();
     if (clusterInd < 0 || clusterInd >= this->clusters.size()) {
-      cout << "Not valid index, throw error" << endl;
+      throw std::runtime_error("The index of the cluster is not valid");
     }
-    return 3;
+    return this->clusters[clusterInd].size();
+  }
+
+  int getLRC() {
+    if (this->LRCsize == -1) {
+      throw std::runtime_error("You cant access the LRCsize from a kmeans solution");
+    }
+    return this->LRCsize;
   }
 
   double getSSE() {
@@ -63,3 +73,7 @@ class Solution {
     }
   }
 };
+
+
+
+#endif

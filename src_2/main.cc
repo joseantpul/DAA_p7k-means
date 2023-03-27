@@ -8,8 +8,8 @@ int main() {
     string filename;
     cout << "Introduce el fichero que quieres usar" << endl;
     cin >> filename;
-    interfaz.show_kmeans_table(filename);
-    //interfaz.show_kmeans_table(file_name);
+    //interfaz.show_kmeans_table(filename);
+    interfaz.show_grasp_table(filename);
     int op = 0;
     cout << "¿Quieres salir del programa? (Introduce 1 en caso afirmativo)" << endl;
     cin >> op;
