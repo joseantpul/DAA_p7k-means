@@ -35,10 +35,10 @@ void interfaz_algoritmos::show_kmeans_table(std::string filename) {
     auto finalTime = high_resolution_clock::now();
     times.push_back(duration_cast<microseconds>(finalTime - startTime).count());
     vector<int> points_per_c = {};
-    for(int clusterIndex = 0; clusterIndex < i; clusterIndex++) {
-      points_per_c.push_back(sol.getNumPointsOfCluster(clusterIndex));
-    }
-    points_per_cluster.push_back(points_per_c);
+    for(int clusterIndex = 0; clusterIndex < i; clusterIndex++) { // COMPROBAR
+      points_per_c.push_back(sol.getNumPointsOfCluster(clusterIndex)); // ESTO DE AQUI COMPROBAR PUEDE TENER FALLOS
+    } //COMPROBAR
+    points_per_cluster.push_back(points_per_c); // COMPROBAR
     SSEs.push_back(sol.getSSE());
   }
   cout << "Instance | " << "Points per cluster | " << "K | " << "SSE | " << "time" << endl; 

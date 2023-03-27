@@ -15,7 +15,11 @@ class Solution {
   }
 
   int getNumPointsOfCluster(int clusterInd) {
-    return this->clusters[clusterInd].size();
+    //return this->clusters[clusterInd].size();
+    if (clusterInd < 0 || clusterInd >= this->clusters.size()) {
+      cout << "Not valid index, throw error" << endl;
+    }
+    return 3;
   }
 
   double getSSE() {

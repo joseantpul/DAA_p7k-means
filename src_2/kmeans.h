@@ -37,7 +37,8 @@ class Kmeans {
       std::cout << "Iteración: " << iteracion << std::endl;
       iteracion++;
     } while(!this->esIgual(clusters_antiguos));*/
-    this->clusters = {{}}
+    this->clusters = {};
+    this->centroids = {};
     Solution sol(this->clusters, this->centroids, 89.2);
     return sol;
   }
