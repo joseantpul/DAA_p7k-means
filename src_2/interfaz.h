@@ -52,6 +52,7 @@ void interfaz_algoritmos::show_kmeans_table(std::string filename) {
 void interfaz_algoritmos::show_grasp_table(std::string filename) {
   this->grasp.load(filename);
   int min_clusters = 2;
+  int lrcsize = 2;
   int max_clusters = grasp.number_of_points() * 0.3; 
   if (max_clusters < min_clusters) {
     max_clusters = 2;
@@ -64,7 +65,7 @@ void interfaz_algoritmos::show_grasp_table(std::string filename) {
   for(int i = min_clusters; i <= max_clusters; i++) {
     numberK.push_back(i);
     auto startTime = high_resolution_clock::now();
-    Solution sol = grasp.grasp_algorithm(i, 2);
+    Solution sol = grasp.grasp_algorithm(i, lrcsize);
     auto finalTime = high_resolution_clock::now();
     times.push_back(duration_cast<microseconds>(finalTime - startTime).count());
     vector<int> points_per_c = {};
@@ -75,7 +76,7 @@ void interfaz_algoritmos::show_grasp_table(std::string filename) {
   cout << "Instance        | " << "Points | " << "K | " << " LRC | " << "SSE | " << "time" << endl; 
   for(int i = 0; i < numberK.size(); i++) {
     cout << filename << " | " << number_of_points << " | " 
-    << numberK[i] << " | " << SSEs[i] << " | " << times[i] << endl; 
+    << numberK[i] << " |  " << lrcsize << " | " << SSEs[i] << " | " << times[i] << endl; 
   }
 }
 
