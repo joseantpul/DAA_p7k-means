@@ -72,7 +72,7 @@ class Solution {
     }
   }
 
-  void mostrar_clusters() {
+  void show_groupings() {
     int contador = 0;
     for (const std::vector<point>& cluster : grouping) {
       std::cout << "Agrupamiento " << contador << ": [";

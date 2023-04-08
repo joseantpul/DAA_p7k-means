@@ -9,8 +9,10 @@ class MatrixPoints {
   int num_points;
   int dimension;
  public:
+  MatrixPoints() {
+    std::srand(static_cast<unsigned>(std::time(nullptr)));
+  }
   std::vector<point> pointsMatrix;
-
   int get_dimension() {
     return this->dimension;
   }
@@ -20,8 +22,13 @@ class MatrixPoints {
   }
   double distanceBetweenPoints(point otherp, point otherp2); // distancia euclidea
   std::vector<std::vector<point> > buildGroupings(std::vector<point> service_points);
+  point takeRandomPoint();
 };
 
+point MatrixPoints::takeRandomPoint() {
+  int random_index = std::rand() % pointsMatrix.size();
+  return pointsMatrix[random_index];
+}
 
 void MatrixPoints::load(string filename) {
   pointsMatrix.clear();

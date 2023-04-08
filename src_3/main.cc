@@ -1,5 +1,5 @@
-#include "matrixPoints.h"
-// #include interfaz
+//#include "interfaz.h"
+#include "solution.h"
 
 int main() {
   /*
@@ -27,18 +27,10 @@ int main() {
   p0val = {15.0, 15.0};
   p1.second = p0val;
   p1.first = 5;
-  vector<vector<point> > grouping = p.buildGroupings({p0, p1});
-    int contador = 0;
-    for (const std::vector<point>& cluster : grouping) {
-      std::cout << "Agrupamiento " << contador << ": [";
-      for (size_t i = 0; i < cluster.size(); ++i) {
-        std::cout << cluster[i].first;
-        if (i < cluster.size() - 1) {
-          std::cout << ", ";
-        }
-      }
-      std::cout << "]\n";
-      contador++;
-    }
+  Solution s;
+  s.add_service_point(p0);
+  s.add_service_point(p1);
+  s.generate_groupings(p);
+  s.show_groupings();
   return 0;
 }
