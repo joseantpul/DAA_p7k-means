@@ -1,5 +1,5 @@
 //#include "interfaz.h"
-#include "solution.h"
+#include "grasp.h"
 
 int main() {
   /*
@@ -16,7 +16,7 @@ int main() {
     if (op == 1) {
       leave = true;
     }
-  }*/
+  }
   MatrixPoints p;
   p.load("../data/pr1.txt");
   vector<double> p0val = {5.0, 5.0};
@@ -30,6 +30,10 @@ int main() {
   vector<point> ppp = p.farthestPoints({p0, p1}, 2);
   for(auto p : ppp) {
     cout << p.first << endl;
-  }
+  }*/
+  Grasp g;
+  g.load("../data/experimento2.txt");
+  Solution s = g.grasp_algorithm(3, 2);
+  s.show_service_points();
   return 0;
 }

@@ -44,6 +44,7 @@ void Grasp::generateLRC(Solution current_solution) {
   this->LRC = points.farthestPoints(current_service_points, this->LRCsize);
 }
 
+// FASE CONSTRUCTIVA TERMINADA
 Solution Grasp::construction_phase(int k, int LRCsize) {
   Solution sol;
   point inicial_point = points.takeRandomPoint();
@@ -52,18 +53,20 @@ Solution Grasp::construction_phase(int k, int LRCsize) {
     this->generateLRC(sol);
     sol.add_service_point(this->takeRandomFromLRC());
   }
+  return sol;
 }
 
   //Para hacer la fase constructiva descomentar todo menos sol = this->busqueda_local(sol)
 Solution Grasp::grasp_algorithm(int k, int LRCsize) {
   Solution mejor_solucion;
   this->LRCsize = LRCsize;
-  for(int i = 0; i < max_iterations; i++) {
+  //for(int i = 0; i < max_iterations; i++) {
     Solution sol = this->construction_phase(k, LRCsize);
-      //sol = this->busqueda_local(sol);
-      //this->actualizar(sol, mejor_solucion);
-  }
-    //return mejor_solucion;
+    //sol = this->busqueda_local(sol);
+    //this->actualizar(sol, mejor_solucion);
+  //}
+  //return mejor_solucion;
+  return sol;
 }
 
 void Grasp::load(string filename) {
