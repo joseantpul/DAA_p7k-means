@@ -21,6 +21,7 @@ class Grasp {
   int LRCsize;
   MatrixPoints points;
   vector<point> LRC;
+  vector<point> service_points;
   Solution construction_phase(int k, int LRCsize);
   point takeRandomFromLRC();
   void generateLRC(Solution current_solution);
@@ -35,11 +36,12 @@ point Grasp::takeRandomFromLRC() {
   }
 }
 
+// LRC con los puntos más alejados de la solución
+// Distancia de un punto al conjunto DE SOLUCIONES distancia mínima a uno de los puntos
 void Grasp::generateLRC(Solution current_solution) {
-  
-  for(int i = 0; i < LRCsize; i++) {
-    
-  }
+  vector<point> current_service_points = current_solution.get_service_points();
+  this->LRC.clear();
+  this->LRC = points.farthestPoints(current_service_points, this->LRCsize);
 }
 
 Solution Grasp::construction_phase(int k, int LRCsize) {

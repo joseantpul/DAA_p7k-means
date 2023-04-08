@@ -8,6 +8,7 @@ class MatrixPoints {
  private:
   int num_points;
   int dimension;
+  double minDistanceToPointSet(const point& p, const std::vector<point>& point_set);
  public:
   MatrixPoints() {
     std::srand(static_cast<unsigned>(std::time(nullptr)));
@@ -23,7 +24,56 @@ class MatrixPoints {
   double distanceBetweenPoints(point otherp, point otherp2); // distancia euclidea
   std::vector<std::vector<point> > buildGroupings(std::vector<point> service_points);
   point takeRandomPoint();
+  vector<point> farthestPoints(vector<point> service_points, int LRCsize);
 };
+
+// La distancia de cada punto a service_points es la distancia mínima con un punto
+// de service_points
+double MatrixPoints::minDistanceToPointSet(const point& p, const std::vector<point>& point_set) {
+  double min_distance = std::numeric_limits<double>::max(); 
+  for (const point& other_point : point_set) {
+    double current_distance = distanceBetweenPoints(p, other_point);   
+      if (current_distance < min_distance) {
+        min_distance = current_distance;
+      }
+  }
+  return min_distance;
+}
+
+
+// Devuelve un vector con los LRCsize puntos mas alejados de service_points
+std::vector<point> MatrixPoints::farthestPoints(std::vector<point> service_points, int LRCsize) {
+  std::vector<point> farthest_points;
+  // Itera sobre los puntos en pointsMatrix y calcula las distancias mínimas a service_points
+  std::vector<double> min_distances;
+  vector<int> id_points;
+  for (const point& current_point : this->pointsMatrix) {
+    if (std::find(service_points.begin(), service_points.end(), current_point) != service_points.end()) continue;
+    //cout << "Punto " << current_point.first << " con distancia minima: " <<  minDistanceToPointSet(current_point, service_points) << endl;
+    // Calcula la distancia mínima al conjunto de puntos service_points
+    double min_distance = minDistanceToPointSet(current_point, service_points);
+    // Almacena la distancia en el vector min_distances
+    min_distances.push_back(min_distance);
+    id_points.push_back(current_point.first);
+  }
+  // Encuentra los índices de los LRCsize puntos más alejados
+  for (int i = 0; i < LRCsize; i++) {
+    double max_distance = -1;
+    int max_distance_index = -1;
+    for (size_t j = 0; j < min_distances.size(); j++) {
+      if (min_distances[j] > max_distance) {
+        max_distance = min_distances[j];
+        max_distance_index = id_points[j];
+      }
+    }
+    if (max_distance_index != -1) {
+      farthest_points.push_back(pointsMatrix[max_distance_index]);
+      // Establece la distancia del punto seleccionado en -1 para que no se vuelva a seleccionar
+      min_distances[max_distance_index] = -1;
+    }
+  }
+  return farthest_points;
+}
 
 point MatrixPoints::takeRandomPoint() {
   int random_index = std::rand() % pointsMatrix.size();

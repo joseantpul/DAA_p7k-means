@@ -27,10 +27,9 @@ int main() {
   p0val = {15.0, 15.0};
   p1.second = p0val;
   p1.first = 5;
-  Solution s;
-  s.add_service_point(p0);
-  s.add_service_point(p1);
-  s.generate_groupings(p);
-  s.show_groupings();
+  vector<point> ppp = p.farthestPoints({p0, p1}, 2);
+  for(auto p : ppp) {
+    cout << p.first << endl;
+  }
   return 0;
 }

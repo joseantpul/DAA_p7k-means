@@ -22,6 +22,10 @@ class Solution {
     this->LRCsize = LRCsize;
   }
 
+  vector<point> get_service_points() {
+    return this->service_points;
+  }
+
   void add_service_point(point service_point) {
     service_points.push_back(service_point);
   }
@@ -41,7 +45,7 @@ class Solution {
     return this->grouping[clusterInd].size();
   }
 
-  int getLRC() {
+  int getLRC_size() {
     if (this->LRCsize == -1) {
       throw std::runtime_error("You cant access the LRCsize from a kmeans solution");
     }
