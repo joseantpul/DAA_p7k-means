@@ -25,7 +25,21 @@ class Grasp {
   Solution construction_phase(int k, int LRCsize);
   point takeRandomFromLRC();
   void generateLRC(Solution current_solution);
+  Solution local_search(Solution current_solution);
 };
+
+Solution Grasp::local_search(Solution solution) {
+  Solution current_solution = solution;
+  while(true) {
+    Solution best_neighbor = generate_neighbor_solution(current_solution); // Esta función no se si hacerla aquí nueva clase que llame a esta función o como
+    if (best_neighbor.getP_median() < current_solution.getP_median()) {
+      current_solution = best_neighbor;
+    } else {
+      break;
+    }
+  }
+  return current_solution;
+}
 
 point Grasp::takeRandomFromLRC() {
   if (LRC.size() > 0) {
@@ -62,7 +76,7 @@ Solution Grasp::grasp_algorithm(int k, int LRCsize) {
   this->LRCsize = LRCsize;
   //for(int i = 0; i < max_iterations; i++) {
     Solution sol = this->construction_phase(k, LRCsize);
-    //sol = this->busqueda_local(sol);
+    sol = this->local_search(sol);
     //this->actualizar(sol, mejor_solucion);
   //}
   //return mejor_solucion;
@@ -72,7 +86,6 @@ Solution Grasp::grasp_algorithm(int k, int LRCsize) {
 void Grasp::load(string filename) {
   points.load(filename);
 }
-
 
 
 #endif
