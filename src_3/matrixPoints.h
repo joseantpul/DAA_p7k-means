@@ -25,6 +25,7 @@ class MatrixPoints {
   std::vector<std::vector<point> > buildGroupings(std::vector<point> service_points);
   point takeRandomPoint();
   vector<point> farthestPoints(vector<point> service_points, int LRCsize);
+  double calculate_Pmedian(vector<point> solution_service_points);
 };
 
 // La distancia de cada punto a service_points es la distancia mínima con un punto
@@ -39,7 +40,6 @@ double MatrixPoints::minDistanceToPointSet(const point& p, const std::vector<poi
   }
   return min_distance;
 }
-
 
 // Devuelve un vector con los LRCsize puntos mas alejados de service_points
 std::vector<point> MatrixPoints::farthestPoints(std::vector<point> service_points, int LRCsize) {
@@ -141,7 +141,23 @@ std::vector<std::vector<point> > MatrixPoints::buildGroupings(std::vector<point>
       std::cerr << "Error: No se encontró el centroide más cercano" << std::endl;
     }
   }
+  if (service_points.size() != grouping.size()) throw std::runtime_error("The number of groupings must be the same as the number of service points");
   return grouping;
+}
+
+// Calcula la P mediana para los puntos de servicio pasados por parámetro
+double MatrixPoints::calculate_Pmedian(vector<point> solution_service_points) {
+  // Suma de la distancia de cada punto a su servicio asociado
+  // Construir agrupamiento
+  // Para cada punto calcular la distancia a su punto de servicio y sumar todas distancias
+  vector<vector<point> > groupings = this->buildGroupings(solution_service_points);
+  double p_median = 0;
+  for(int i = 0; i < groupings.size(); i++) {
+    for(const point& current_point: groupings[i]) {
+      p_median += this->distanceBetweenPoints(solution_service_points[i], current_point);
+    }
+  }
+  return p_median;
 }
 
 #endif

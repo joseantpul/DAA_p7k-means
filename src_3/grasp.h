@@ -15,7 +15,7 @@ class Grasp {
   int number_of_points() {
     return this->points.number_of_points();
   }
-
+  
  private:
   int max_iterations;
   int LRCsize;
@@ -25,9 +25,10 @@ class Grasp {
   Solution construction_phase(int k, int LRCsize);
   point takeRandomFromLRC();
   void generateLRC(Solution current_solution);
-  Solution local_search(Solution current_solution);
+  //Solution local_search(Solution current_solution);
+  double calculate_Pmedian(vector<point> solution_service_points);
 };
-
+/*
 Solution Grasp::local_search(Solution solution) {
   Solution current_solution = solution;
   while(true) {
@@ -40,7 +41,7 @@ Solution Grasp::local_search(Solution solution) {
   }
   return current_solution;
 }
-
+*/
 point Grasp::takeRandomFromLRC() {
   if (LRC.size() > 0) {
     int random_index = std::rand() % this->LRC.size();
@@ -76,15 +77,20 @@ Solution Grasp::grasp_algorithm(int k, int LRCsize) {
   this->LRCsize = LRCsize;
   //for(int i = 0; i < max_iterations; i++) {
     Solution sol = this->construction_phase(k, LRCsize);
-    sol = this->local_search(sol);
+    //sol = this->local_search(sol); DESCOMENTAR AHORA CUANDO TERMINE DE PROBAR
     //this->actualizar(sol, mejor_solucion);
   //}
   //return mejor_solucion;
+  sol.generate_groupings(points);
   return sol;
 }
 
 void Grasp::load(string filename) {
   points.load(filename);
+}
+
+double Grasp::calculate_Pmedian(vector<point> solution_service_points) {
+  return points.calculate_Pmedian(solution_service_points);
 }
 
 

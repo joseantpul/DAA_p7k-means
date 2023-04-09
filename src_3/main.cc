@@ -35,5 +35,6 @@ int main() {
   g.load("../data/experimento2.txt");
   Solution s = g.grasp_algorithm(3, 2);
   s.show_service_points();
+  s.show_groupings();
   return 0;
 }
