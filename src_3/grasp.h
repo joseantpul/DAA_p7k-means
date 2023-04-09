@@ -7,7 +7,7 @@
 class Grasp {
  public:
   Grasp() {
-    max_iterations = 1000;
+    max_iterations = 30;
     std::srand(static_cast<unsigned>(std::time(nullptr)));
   }
   void load(string filename);
@@ -17,6 +17,7 @@ class Grasp {
   }
   Solution generate_neighbor_solution(Solution solution);
  private:
+  Solution best_solution;
   int max_iterations;
   int LRCsize;
   MatrixPoints points;
@@ -26,13 +27,56 @@ class Grasp {
   point takeRandomFromLRC();
   void generateLRC(Solution current_solution);
   Solution local_search(Solution current_solution);
+  void update_best_solution(Solution new_solution, int& iwc);
   double calculate_Pmedian(vector<point> solution_service_points);
   //Solution generate_neighbor_solution(Solution solution);
   // Devuelve los mejores puntos de servicio de cada espacio de soluciones
+  // ¿LOS MOVIMIENTOS DE DELETE E INSERT CAMBIAN K YA QUE K ES EL NÚMERO DE PUNTOS DE SERVICIO?????
+  // ¿A LA HORA DE LLAMAR AL ALGORITMO LLAMARLO SIEMPRE DESDE K = 2 Y QUE EL SOLO SUBA EL TAMAÑO DE K????
+  // ESTO ES BASURA SIEMPRE VA A TENDER A INSERT PARA QUE SEA UN PS PARA CADA PUNTO
   vector<point> delete_solution_space(vector<point> original_sp);
   vector<point> insert_solution_space(vector<point> original_sp);
   vector<point> exchange_solution_space(vector<point> original_sp);
 };
+
+void Grasp::update_best_solution(Solution new_solution, int& iwc) {
+  if(this->best_solution.isEmpty()) {
+    best_solution = new_solution;
+    return;
+  }
+  if(new_solution.getP_median() < best_solution.getP_median()) {
+    iwc = 0;
+    best_solution = new_solution;
+    return;
+  }
+  iwc += 1;
+}
+
+vector<point> Grasp::exchange_solution_space(vector<point> original_sp) {
+  vector<point> best_exchanged_sp = original_sp;
+  double min_p_median = calculate_Pmedian(original_sp);
+  for (size_t i = 0; i < original_sp.size(); ++i) {
+    for (const point& candidate_point : points.pointsMatrix) {
+      // Comprueba si candidate_point ya está en original_sp
+      if (std::find(original_sp.begin(), original_sp.end(), candidate_point) != original_sp.end()) {
+        continue;
+      }
+      vector<point> exchanged_sp = original_sp;
+      exchanged_sp[i] = candidate_point;
+      double current_p_median = calculate_Pmedian(exchanged_sp); //CAMBIAR ESTO
+      cout << "Mirando punto con pmedia: " << current_p_median << ": ";
+      for(const point& p: exchanged_sp) {
+        cout << p.first << " ";
+      }
+      cout << endl;
+      if (current_p_median < min_p_median) {
+        min_p_median = current_p_median;
+        best_exchanged_sp = exchanged_sp;
+      }
+    }
+  }
+  return best_exchanged_sp;
+}
 
 vector<point> Grasp::delete_solution_space(vector<point> original_sp) {
   vector<point> best_deleted_sp;
@@ -49,6 +93,25 @@ vector<point> Grasp::delete_solution_space(vector<point> original_sp) {
   return best_deleted_sp;
 }
 
+vector<point> Grasp::insert_solution_space(vector<point> original_sp) {
+  vector<point> best_inserted_sp;
+  double min_p_median = std::numeric_limits<double>::max();
+  for (const point& candidate_point : points.pointsMatrix) {
+    // Comprueba si candidate_point ya está en original_sp
+    if (std::find(original_sp.begin(), original_sp.end(), candidate_point) != original_sp.end()) {
+      continue;
+    }
+    vector<point> inserted_sp = original_sp;
+    inserted_sp.push_back(candidate_point);
+    double current_p_median = calculate_Pmedian(inserted_sp); // CAMBIAR ESTO
+    if (current_p_median < min_p_median) {
+      min_p_median = current_p_median;
+      best_inserted_sp = inserted_sp;
+    }
+  }
+  return best_inserted_sp;
+}
+
 // Genera la (mejor/primera mejor)? solucion vecina, si no hay ninguna mejor devuelve la misma 
 Solution Grasp::generate_neighbor_solution(Solution solution) {
   // Movimientos de eliminación, inserción e intercambio, cada uno genera una nueva lista de service_points
@@ -56,21 +119,20 @@ Solution Grasp::generate_neighbor_solution(Solution solution) {
   vector<point> current_service_points = solution.get_service_points();
   vector<point> best_sp_delete = this->delete_solution_space(current_service_points);
   double p_median_delete = calculate_Pmedian(best_sp_delete);
-  /*vector<point> best_sp_insert = this->insert_solution_space(current_service_points);
+  vector<point> best_sp_insert = this->insert_solution_space(current_service_points);
   double p_median_insert = calculate_Pmedian(best_sp_insert);
   vector<point> best_sp_exchange = this->exchange_solution_space(current_service_points);
   double p_median_exchange = calculate_Pmedian(best_sp_exchange);
-  double min_p_median_neighbor = std::min(p_median_delete, p_median_insert, p_median_exchange);*/
-  double min_p_median_neighbor = p_median_delete;
+  double min_p_median_neighbor = std::min({p_median_delete, p_median_insert, p_median_exchange});
   vector<point> best_sp_neighbor;
   if(min_p_median_neighbor == p_median_delete) {
     best_sp_neighbor = best_sp_delete;
-  }/* else if(min_p_median_neighbor == p_median_insert) {
+  } else if(min_p_median_neighbor == p_median_insert) {
     best_sp_neighbor = best_sp_insert;
   } else {
     best_sp_neighbor = best_sp_exchange;
-  }*/
-  cout << "Pm original: " << solution.getP_median() << " Pm delete: " << min_p_median_neighbor << endl;
+  }
+  cout << "Pm original: " << solution.getP_median() << " Pm menor: " << min_p_median_neighbor << endl;
   if (min_p_median_neighbor < solution.getP_median()) {
     return Solution(best_sp_neighbor, this->points, min_p_median_neighbor);
   }
@@ -117,22 +179,25 @@ Solution Grasp::construction_phase(int k, int LRCsize) {
     this->generateLRC(sol);
     sol.add_service_point(this->takeRandomFromLRC());
   }
+  sol.update_data(this->points, true); // No generamos los agrupamientos, solo p mediana
   return sol;
 }
 
-  //Para hacer la fase constructiva descomentar todo menos sol = this->busqueda_local(sol)
+  // Para hacer la fase constructiva descomentar todo menos sol = this->busqueda_local(sol)
 Solution Grasp::grasp_algorithm(int k, int LRCsize) {
-  Solution mejor_solucion;
+  this->best_solution.clear();
+  int iterations_without_change = 0;
   this->LRCsize = LRCsize;
-  //for(int i = 0; i < max_iterations; i++) {
+  for(int i = 0; i < max_iterations; i++) {
     Solution sol = this->construction_phase(k, LRCsize);
-    //sol = this->local_search(sol);
-    //this->actualizar(sol, mejor_solucion);
-  //}
-  //return mejor_solucion;
-  sol.generate_groupings(points);
-  sol.setP_median(calculate_Pmedian(sol.get_service_points()));
-  return sol;
+    sol = this->local_search(sol);
+    this->update_best_solution(sol, iterations_without_change);
+    if (iterations_without_change > 5) {
+      break;
+    }
+  }
+  best_solution.update_data(points);
+  return this->best_solution;
 }
 
 void Grasp::load(string filename) {

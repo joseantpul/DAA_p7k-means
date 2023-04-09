@@ -33,11 +33,9 @@ int main() {
   }*/
   Grasp g;
   g.load("../data/experimento2.txt");
-  Solution s = g.grasp_algorithm(4, 2);
+  Solution s = g.grasp_algorithm(3, 2);
   s.show_service_points();
   s.show_groupings();
-  Solution s2 = g.generate_neighbor_solution(s);
-  s2.show_service_points();
-  s2.show_groupings();
+  cout << s.getP_median();
   return 0;
 }

@@ -5,12 +5,14 @@
 #include "matrixPoints.h"
 
 class Solution {
- public:
+ private:
   std::vector<std::vector<point> > grouping;
   std::vector<point> service_points;
   double p_median;
-  int number_of_points;
-  int LRCsize; 
+  void generate_groupings(MatrixPoints points) {
+    this->grouping = points.buildGroupings(this->service_points);
+  }
+ public:
 
   Solution() {}
 
@@ -18,6 +20,21 @@ class Solution {
     this->service_points = sp;
     this->generate_groupings(mp);
     this->p_median = Pmedian;
+  }
+
+  void clear() {
+    service_points.clear();
+    grouping.clear();
+  }
+  
+  // Da valor a p_median, grouping por optimización puedes elegir si generar groupings o no (por defecto si se generan)
+  void update_data(MatrixPoints points, bool onlypmedian = 0) {
+    if (this->service_points.empty()) {
+      throw std::runtime_error("Se ha intentado actualizar la solución sin tener puntos de servicio");
+    }
+    this->p_median = points.calculate_Pmedian(this->service_points);
+    if(onlypmedian) return;
+    this->generate_groupings(points);
   }
 
   vector<point> get_service_points() {
@@ -28,10 +45,6 @@ class Solution {
     this->service_points.push_back(service_point);
   }
 
-  void generate_groupings(MatrixPoints points) {
-    this->grouping = points.buildGroupings(this->service_points);
-  }
-
   int getNumPointsOfCluster(int clusterInd) {
     if (clusterInd < 0 || clusterInd >= this->grouping.size()) {
       throw std::runtime_error("The index of the cluster is not valid");
@@ -39,23 +52,12 @@ class Solution {
     return this->grouping[clusterInd].size();
   }
 
-  int getLRC_size() {
-    if (this->LRCsize == -1) {
-      throw std::runtime_error("You cant access the LRCsize from a kmeans solution");
-    }
-    return this->LRCsize;
-  }
-
   double getP_median() {
     return this->p_median;
   }
 
-  void setP_median(double pmedian) {
-    this->p_median = pmedian;
-  }
-
-  int get_number_of_points() {
-    return this->number_of_points;
+  bool isEmpty() {
+    return this->service_points.empty();
   }
 
   void show_service_points() {
