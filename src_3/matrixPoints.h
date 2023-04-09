@@ -147,9 +147,6 @@ std::vector<std::vector<point> > MatrixPoints::buildGroupings(std::vector<point>
 
 // Calcula la P mediana para los puntos de servicio pasados por parámetro
 double MatrixPoints::calculate_Pmedian(vector<point> solution_service_points) {
-  // Suma de la distancia de cada punto a su servicio asociado
-  // Construir agrupamiento
-  // Para cada punto calcular la distancia a su punto de servicio y sumar todas distancias
   vector<vector<point> > groupings = this->buildGroupings(solution_service_points);
   double p_median = 0;
   for(int i = 0; i < groupings.size(); i++) {

@@ -14,12 +14,10 @@ class Solution {
 
   Solution() {}
 
-  Solution(const std::vector<std::vector<point> >& input_clusters, const std::vector<point>& input_centroids, double SSE, int np, int LRCsize = -1) {
-    grouping = input_clusters;
-    service_points = input_centroids;
-    this->p_median = SSE;
-    number_of_points = np;
-    this->LRCsize = LRCsize;
+  Solution(vector<point> sp, MatrixPoints mp, double Pmedian) {
+    this->service_points = sp;
+    this->generate_groupings(mp);
+    this->p_median = Pmedian;
   }
 
   vector<point> get_service_points() {
@@ -27,15 +25,11 @@ class Solution {
   }
 
   void add_service_point(point service_point) {
-    service_points.push_back(service_point);
+    this->service_points.push_back(service_point);
   }
 
   void generate_groupings(MatrixPoints points) {
-    grouping = points.buildGroupings(this->service_points);
-  }
-
-  void calculatePmedian(MatrixPoints points) {
-
+    this->grouping = points.buildGroupings(this->service_points);
   }
 
   int getNumPointsOfCluster(int clusterInd) {
@@ -56,10 +50,13 @@ class Solution {
     return this->p_median;
   }
 
+  void setP_median(double pmedian) {
+    this->p_median = pmedian;
+  }
+
   int get_number_of_points() {
     return this->number_of_points;
   }
-
 
   void show_service_points() {
     int contador = 0;
