@@ -1,8 +1,6 @@
-//#include "interfaz.h"
-#include "grasp.h"
+#include "interfaz.h"
 
 int main() {
-  /*
   bool leave = false;
   interfaz_algoritmos interfaz; // clase que contiene un atributo para cada algoritmo y genera su tabla
   while(!leave) {
@@ -17,25 +15,5 @@ int main() {
       leave = true;
     }
   }
-  MatrixPoints p;
-  p.load("../data/pr1.txt");
-  vector<double> p0val = {5.0, 5.0};
-  point p0;
-  p0.first = 2;
-  p0.second = p0val;
-  point p1;
-  p0val = {15.0, 15.0};
-  p1.second = p0val;
-  p1.first = 5;
-  vector<point> ppp = p.farthestPoints({p0, p1}, 2);
-  for(auto p : ppp) {
-    cout << p.first << endl;
-  }*/
-  Grasp g;
-  g.load("../data/experimento2.txt");
-  Solution s = g.grasp_algorithm(3, 2);
-  s.show_service_points();
-  s.show_groupings();
-  cout << s.getP_median();
   return 0;
 }

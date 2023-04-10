@@ -64,11 +64,11 @@ vector<point> Grasp::exchange_solution_space(vector<point> original_sp) {
       vector<point> exchanged_sp = original_sp;
       exchanged_sp[i] = candidate_point;
       double current_p_median = calculate_Pmedian(exchanged_sp); //CAMBIAR ESTO
-      cout << "Mirando punto con pmedia: " << current_p_median << ": ";
+      /* cout << "Mirando punto con pmedia: " << current_p_median << ": ";
       for(const point& p: exchanged_sp) {
         cout << p.first << " ";
       }
-      cout << endl;
+      cout << endl; */
       if (current_p_median < min_p_median) {
         min_p_median = current_p_median;
         best_exchanged_sp = exchanged_sp;
@@ -94,6 +94,11 @@ vector<point> Grasp::delete_solution_space(vector<point> original_sp) {
 }
 
 vector<point> Grasp::insert_solution_space(vector<point> original_sp) {
+  const int max_size_for_solution = this->points.number_of_points() * 0.3; // 30% de los puntos
+  if (original_sp.size() == max_size_for_solution) { 
+    // cout << "Se ha alcanzado el tamaño máximo (" << max_size_for_solution << ") de agrupamientos" << endl;
+    return original_sp;
+  }
   vector<point> best_inserted_sp;
   double min_p_median = std::numeric_limits<double>::max();
   for (const point& candidate_point : points.pointsMatrix) {
@@ -132,7 +137,7 @@ Solution Grasp::generate_neighbor_solution(Solution solution) {
   } else {
     best_sp_neighbor = best_sp_exchange;
   }
-  cout << "Pm original: " << solution.getP_median() << " Pm menor: " << min_p_median_neighbor << endl;
+  //cout << "Pm original: " << solution.getP_median() << " Pm menor: " << min_p_median_neighbor << endl;
   if (min_p_median_neighbor < solution.getP_median()) {
     return Solution(best_sp_neighbor, this->points, min_p_median_neighbor);
   }
@@ -170,7 +175,6 @@ void Grasp::generateLRC(Solution current_solution) {
   this->LRC = points.farthestPoints(current_service_points, this->LRCsize);
 }
 
-// FASE CONSTRUCTIVA TERMINADA
 Solution Grasp::construction_phase(int k, int LRCsize) {
   Solution sol;
   point inicial_point = points.takeRandomPoint();
@@ -183,8 +187,11 @@ Solution Grasp::construction_phase(int k, int LRCsize) {
   return sol;
 }
 
-  // Para hacer la fase constructiva descomentar todo menos sol = this->busqueda_local(sol)
+// Para hacer la fase constructiva descomentar todo menos sol = this->busqueda_local(sol)
 Solution Grasp::grasp_algorithm(int k, int LRCsize) {
+  if (this->points.pointsMatrix.empty()) {
+    throw std::runtime_error("No se puede hacer el algoritmo sin antes cargar un fichero de datos");
+  }
   this->best_solution.clear();
   int iterations_without_change = 0;
   this->LRCsize = LRCsize;
@@ -197,6 +204,8 @@ Solution Grasp::grasp_algorithm(int k, int LRCsize) {
     }
   }
   best_solution.update_data(points);
+  this->service_points.clear(); // Limpiamos por si queremos usar el algoritmo varias veces
+  this->LRC.clear();
   return this->best_solution;
 }
 
