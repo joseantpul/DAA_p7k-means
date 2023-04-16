@@ -18,7 +18,7 @@ int main() {
   }
   return 0;*/
   Grasp p;
-  p.load("../data/experimento2.txt");
+  p.load("../data/data1.txt");
   Solution sol = p.construction_phase(3, 2);
   sol = p.GVNS(sol);
   sol.show_service_points();

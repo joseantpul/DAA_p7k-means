@@ -8,7 +8,7 @@ class Grasp {
  public:
   Solution construction_phase(int k, int LRCsize);
   Solution GVNS(Solution current_solution);
-  vector<point> VND(vector<point> service_points);
+  Solution VND(Solution service_points);
   Grasp() {
     std::srand(static_cast<unsigned>(std::time(nullptr)));
   }
@@ -34,22 +34,30 @@ class Grasp {
   vector<point> insert_solution_space(vector<point> original_sp);
   vector<point> exchange_solution_space(vector<point> original_sp);
 
-  vector<point> shake(vector<point> original_sp, int number_exchanges);
+  Solution shake(Solution original_sp, int number_exchanges);
 
 };
 
-vector<point> Grasp::VND(vector<point> current_solution) {
+Solution Grasp::VND(Solution current_solution) {
   int l = 1;
   while(l < 4) { // 3 estructuras, intercambio, inserción, elminación
-    vector<point> new_solution;
+    vector<point> new_solution_sp;
+    vector<point> current_solution_sp = current_solution.get_service_points();
+    double pmedian_new_sol;
     if (l == 1) {
-      new_solution = exchange_solution_space(current_solution);
+      new_solution_sp = exchange_solution_space(current_solution_sp);
+      pmedian_new_sol = calculate_Pmedian(new_solution_sp);
     } else if (l == 2) {
-      new_solution = insert_solution_space(current_solution);
+      new_solution_sp = insert_solution_space(current_solution_sp);
+      double penalty_factor = calculate_Pmedian(new_solution_sp) * 0.3; 
+      pmedian_new_sol = calculate_Pmedian(new_solution_sp) + penalty_factor;
     } else {
-      new_solution = delete_solution_space(current_solution);
+      new_solution_sp = delete_solution_space(current_solution_sp);
+      double support_factor = calculate_Pmedian(new_solution_sp) * 0.3;
+      pmedian_new_sol = calculate_Pmedian(new_solution_sp) - support_factor;
     }
-    if (calculate_Pmedian(new_solution) < calculate_Pmedian(current_solution)) {
+    Solution new_solution(new_solution_sp, this->points, pmedian_new_sol);
+    if (new_solution.getP_median() < current_solution.getP_median()) {
       current_solution = new_solution;
       l = 1;
     } else {
@@ -59,7 +67,8 @@ vector<point> Grasp::VND(vector<point> current_solution) {
   return current_solution;
 }
 
-vector<point> Grasp::shake(vector<point> original_sp, int number_exchanges) {
+Solution Grasp::shake(Solution original_solution, int number_exchanges) {
+  vector<point> original_sp = original_solution.get_service_points();
   if (original_sp.size() > 0) {
     for (int i = 0; i < number_exchanges; ++i) {
       int random_index1 = std::rand() % original_sp.size();
@@ -68,16 +77,17 @@ vector<point> Grasp::shake(vector<point> original_sp, int number_exchanges) {
       original_sp[random_index1] = original_sp[random_index2];
       original_sp[random_index2] = aux;
     }
-    return original_sp;
+    return Solution(original_sp, this->points, calculate_Pmedian(original_sp));
   } else {
-    throw std::runtime_error("No se puede agitar si no hay puntos de servicio");
+    cout << "No se pudo hacer el agitamiento, número de puntos de servicio: " << original_sp.size() << endl;
+    return original_solution;
   }
 }
 
 Solution Grasp::GVNS(Solution current_solution) {
-  vector<point> current_sp = current_solution.get_service_points();
-  int max_iterations = 50;
+  int max_iterations = 10;
   int kmax = 4; // Número máximo de intercambios en el shaking + 1
+  vector<point> current_sp = current_solution.get_service_points();
   if (current_sp.size() <= 1) {
     cout << current_sp.size();
     throw std::runtime_error("No se puede hacer GVNS con un solo punto de servicio");
@@ -88,17 +98,17 @@ Solution Grasp::GVNS(Solution current_solution) {
   for(int i = 0; i < max_iterations; i++) {
     int k = 1;
     while(k < kmax) {
-      vector<point> shake_sp = shake(current_sp, k);
-      vector<point> local_optimum = VND(shake_sp);
-      if (local_optimum < current_sp) {
+      Solution shake_sp = shake(current_solution, k);
+      Solution local_optimum = VND(shake_sp);
+      if (local_optimum.getP_median() < current_solution.getP_median()) {
         k = 1;
-        current_sp = local_optimum;        
+        current_solution = local_optimum;        
       } else {
         k += 1;
       }
     }
   }
-  return Solution(current_sp, this->points, calculate_Pmedian(current_sp));
+  return current_solution;
 }
 
 void Grasp::update_best_solution(Solution new_solution, int& iwc) {

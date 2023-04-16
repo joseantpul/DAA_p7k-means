@@ -26,6 +26,10 @@ class Solution {
     service_points.clear();
     grouping.clear();
   }
+
+  void set_Pmedian(double pm) {
+    this->p_median = pm;
+  }
   
   // Da valor a p_median, grouping por optimización puedes elegir si generar groupings o no (por defecto si se generan)
   void update_data(MatrixPoints points, bool onlypmedian = 0) {
