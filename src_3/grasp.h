@@ -122,10 +122,17 @@ Solution Grasp::generate_neighbor_solution(Solution solution) {
   // Movimientos de eliminación, inserción e intercambio, cada uno genera una nueva lista de service_points
   // Para cada una comprobar su Pmediana y quedarnos con la mejor, (PARA HAYAR LA PMEDIANA DE LOS VECINOS HAY Q HACER ESO)
   vector<point> current_service_points = solution.get_service_points();
+  //--------delete---------------------------------------------------------------
   vector<point> best_sp_delete = this->delete_solution_space(current_service_points);
   double p_median_delete = calculate_Pmedian(best_sp_delete);
+  double support_factor = p_median_delete * 0.075;
+  p_median_delete -= (support_factor * best_sp_delete.size()); // Apoyando eliminación
+  //--------insert---------------------------------------------------------------
   vector<point> best_sp_insert = this->insert_solution_space(current_service_points);
   double p_median_insert = calculate_Pmedian(best_sp_insert);
+  double penalty_factor = p_median_insert * 0.1; 
+  p_median_insert += (penalty_factor * best_sp_insert.size()); // Penalizando inserción 
+  //--------intercambio-----------------------------------------------------------
   vector<point> best_sp_exchange = this->exchange_solution_space(current_service_points);
   double p_median_exchange = calculate_Pmedian(best_sp_exchange);
   double min_p_median_neighbor = std::min({p_median_delete, p_median_insert, p_median_exchange});
@@ -143,7 +150,6 @@ Solution Grasp::generate_neighbor_solution(Solution solution) {
   }
   return solution; // No hay ningún vecino mejor
 }
-
 
 Solution Grasp::local_search(Solution solution) {
   Solution current_solution = solution;
