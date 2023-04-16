@@ -12,17 +12,16 @@ class interfaz_algoritmos {
     this->min_agrupamientos = 2;
   }
   void show_grasp_table(std::string filename);
-
+  int get_num_points(std::string filename);
  private:
   int lrcsize;
   int min_agrupamientos;
   int max_agrupamientos;
-  Grasp grasp;
 };
 
 void interfaz_algoritmos::show_grasp_table(std::string filename) {
-  this->grasp.load(filename);
-  max_agrupamientos = grasp.number_of_points() * 0.3; 
+  int np = get_num_points(filename);
+  max_agrupamientos = np * 0.3; 
   if (max_agrupamientos < min_agrupamientos) {
     max_agrupamientos = 2;
   } 
@@ -31,8 +30,10 @@ void interfaz_algoritmos::show_grasp_table(std::string filename) {
   vector<double> SSEs;
   vector<int> numberK;
   int number_of_points;
-  cout << "Número de puntos: " << grasp.number_of_points() << endl;
+  cout << "Número de puntos: " << np << endl;
   for(int i = min_agrupamientos; i <= max_agrupamientos; i++) {
+    Grasp grasp;
+    grasp.load(filename);
     auto startTime = high_resolution_clock::now();
     Solution sol = grasp.grasp_algorithm(i, lrcsize);
     auto finalTime = high_resolution_clock::now();
@@ -44,5 +45,11 @@ void interfaz_algoritmos::show_grasp_table(std::string filename) {
   }
 }
 
+int interfaz_algoritmos::get_num_points(std::string filename) {
+  std::ifstream ifile(filename);
+  int m;
+  ifile >> m;
+  return m;
+}
 
 #endif

@@ -51,9 +51,12 @@ Solution Grasp::VND(Solution current_solution) {
       new_solution_sp = insert_solution_space(current_solution_sp);
       double penalty_factor = calculate_Pmedian(new_solution_sp) * 0.3; 
       pmedian_new_sol = calculate_Pmedian(new_solution_sp) + penalty_factor;
-    } else {
+    } else if (l == 3){
+      if (current_solution_sp.size() == 1) {
+        cout << "ALERTA: va a empezar a generar soluciones vacias DISMINUIR support_factor" << endl;
+      }
       new_solution_sp = delete_solution_space(current_solution_sp);
-      double support_factor = calculate_Pmedian(new_solution_sp) * 0.3;
+      double support_factor = calculate_Pmedian(new_solution_sp) * 0.2;
       pmedian_new_sol = calculate_Pmedian(new_solution_sp) - support_factor;
     }
     Solution new_solution(new_solution_sp, this->points, pmedian_new_sol);
@@ -64,6 +67,7 @@ Solution Grasp::VND(Solution current_solution) {
       l++;
     }
   }
+  //current_solution.show_service_points();
   return current_solution;
 }
 
@@ -100,6 +104,10 @@ Solution Grasp::GVNS(Solution current_solution) {
     while(k < kmax) {
       Solution shake_sp = shake(current_solution, k);
       Solution local_optimum = VND(shake_sp);
+      //cout << "en gvns" << endl;
+      //local_optimum.show_service_points();
+      //cout << "curretn sol" << endl;
+      //current_solution.show_service_points();
       if (local_optimum.getP_median() < current_solution.getP_median()) {
         k = 1;
         current_solution = local_optimum;        
@@ -248,7 +256,7 @@ void Grasp::generateLRC(Solution current_solution) {
   vector<point> current_service_points = current_solution.get_service_points();
   this->LRC.clear();
   this->LRC = points.farthestPoints(current_service_points, this->LRCsize);
-  cout << LRC.size();
+  //cout << LRC.size();
 }
 
 Solution Grasp::construction_phase(int k, int LRCsize) {
@@ -276,7 +284,7 @@ Solution Grasp::grasp_algorithm(int k, int LRCsize) {
   this->LRCsize = LRCsize;
   for(int i = 0; i < max_iterations; i++) {
     Solution sol = this->construction_phase(k, LRCsize);
-    sol = this->local_search(sol);
+    sol = this->GVNS(sol);
     this->update_best_solution(sol, iterations_without_change);
     if (iterations_without_change > max_iterations_without_change) {
       break;
