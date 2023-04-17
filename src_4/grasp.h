@@ -74,12 +74,18 @@ Solution Grasp::VND(Solution current_solution) {
 Solution Grasp::shake(Solution original_solution, int number_exchanges) {
   vector<point> original_sp = original_solution.get_service_points();
   if (original_sp.size() > 0) {
-    for (int i = 0; i < number_exchanges; ++i) {
-      int random_index1 = std::rand() % original_sp.size();
-      int random_index2 = std::rand() % original_sp.size();
-      point aux = original_sp[random_index1];
-      original_sp[random_index1] = original_sp[random_index2];
-      original_sp[random_index2] = aux;
+    int exchanges_completed = 0;
+    vector<point> already_used;
+    while(exchanges_completed < number_exchanges) {
+      point candidate_point = points.takeRandomPoint();
+      if (std::find(original_sp.begin(), original_sp.end(), candidate_point) != original_sp.end()
+       || std::find(already_used.begin(), already_used.end(), candidate_point) != already_used.end()) {
+        continue;
+      }
+      int random_index = std::rand() % original_sp.size();
+      already_used.push_back(original_sp[random_index]);
+      original_sp[random_index] = candidate_point;
+      exchanges_completed++;
     }
     return Solution(original_sp, this->points, calculate_Pmedian(original_sp));
   } else {
